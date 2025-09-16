@@ -96,7 +96,6 @@ class JobApplicationsAdmin(BaseAdmin):
         return obj.candidate.name  
     get_candidate_name.short_description = 'Candidato'
 
-    # urls personalizadas
     def get_urls(self):
         from django.urls import path
         urls = super().get_urls()
@@ -109,14 +108,12 @@ class JobApplicationsAdmin(BaseAdmin):
         ]
         return custom_urls + urls
 
-    # Vista custom de evaluación
     def evaluate_offer(self, request, offer_id):
         offer = JobOffers.objects.get(pk=offer_id)
         applications = JobApplications.objects.filter(
             joboffers=offer
         ).select_related("candidate").prefetch_related("analysis")
 
-        # generar análisis si no existe
         for application in applications:
             if not AplicationsAiAnalysis.objects.filter(jobApplications=application).exists():
                 AplicationsAiAnalysis.objects.create(
@@ -132,7 +129,6 @@ class JobApplicationsAdmin(BaseAdmin):
             messages.SUCCESS
         )
 
-        # Contexto para resultado
         context = {
             "offer": offer,
             "applications": applications,
@@ -144,7 +140,6 @@ class JobApplicationsAdmin(BaseAdmin):
             context
         )
 
-    # sobrescribir changelist para agregar flag default y current_offer_id
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         extra_context["has_evaluate_button"] = False
