@@ -1,0 +1,26 @@
+/* Botones de eliminar (modo claro) */
+a.bg-red-600 {
+    background-color: rgb(90, 205, 90) !important; /* verde */
+    color: white !important;
+}
+
+/* Botones de eliminar (hover en modo claro) */
+a.bg-red-600:hover {
+    background-color: rgb(70, 185, 70) !important;
+}
+
+/* Modo oscuro: reemplaza el fondo rojo semitransparente por verde */
+a.dark\:bg-red-500\/20 {
+    background-color: rgba(90, 205, 90, 0.2) !important;
+    color: rgb(90, 205, 90) !important;
+}
+
+/* Modo oscuro hover */
+a.dark\:bg-red-500\/20:hover {
+    background-color: rgba(70, 185, 70, 0.3) !important;
+}
+
+.breadcrumbs{
+        padding: 1rem !important;
+}
+

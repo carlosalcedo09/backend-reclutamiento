@@ -1,0 +1,63 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block filters %}
+    {{ block.super }}
+    {% if current_offer_id %}
+        <div style="padding:10px; border-radius:6px; background:#5bcdfa; color:white;">
+            <button type="button" class="button" style="width:100%;" onclick="openModal()">
+                 Evaluar
+            </button>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        .modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .modal {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+    </style>
+{% endblock %}
+
+{% block footer %}
+    {{ block.super }}
+    {% if current_offer_id %}
+    <div id="modalBackdrop" class="modal-backdrop">
+        <div class="modal">
+            <h3 style="padding:1rem; font-weight:bold;">¿Estás seguro?</h3>
+            <p style="padding:0.5rem;">Se evaluarán todas las postulaciones de esta oferta.</p>
+            <a href="{% url 'admin:jobapplications_evaluate_offer' current_offer_id %}" 
+               class="button" 
+               style="border-radius:6px; background:#003b99; color:white; padding:0.7rem; display:inline-block; margin:0.5rem; cursor: pointer;">
+             Sí, evaluar
+            </a>
+            <button onclick="closeModal()" class="button cancel" style="border-radius:6px; background:#5bcdfa; color:white; padding:0.7rem; margin:0.5rem; cursor: pointer;">Cancelar</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        function openModal() {
+            document.getElementById("modalBackdrop").style.display = "flex";
+        }
+        function closeModal() {
+            document.getElementById("modalBackdrop").style.display = "none";
+        }
+    </script>
+{% endblock %}

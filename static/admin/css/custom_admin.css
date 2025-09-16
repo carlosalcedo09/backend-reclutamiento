@@ -1,0 +1,20 @@
+/* static/admin/css/custom_admin.css */
+
+fieldset.module div.form-row {
+    display: inline-block;
+    width: 45%; /* Ajusta el ancho de las columnas */
+}
+
+fieldset.module div.form-row:nth-child(even) {
+    margin-left: 2.5%; /* Margen izquierdo para la segunda columna */
+}
+
+fieldset.module div.form-row:nth-child(odd) {
+    margin-right: 2.5%; /* Margen derecho para la primera columna */
+}
+
+fieldset.module.full-width div.form-row {
+    width: 100%;
+    display: block;
+    margin-right: 0;
+}

@@ -1,0 +1,69 @@
+#table-budget,
+#modal-total {
+    font-size: 11px;
+}
+
+#table-budget .table-responsive {
+    max-height: 60vh;
+}
+
+#modal-content {
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 30px;
+}
+#modal-content p:nth-last-of-type(1){
+    font-weight: 700;
+    color: #000;
+}
+
+#modal-total table {
+    width: 75%;
+}
+
+.modal-body {
+  
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+a {
+    text-decoration: none;
+}
+
+
+.table-modal td, .table-modal th {
+    width: 150px;
+    word-wrap: break-word;
+  }
+  
+.table-modal td:nth-child(1) { width: 50px; }
+.table-modal td:nth-child(2) { width: 350px;}
+.table-modal td:nth-child(3) { width: 250px;}
+.table-modal td:nth-child(4) { width: 350px;}
+.table-modal td:nth-child(5) { width: 250px;}
+.table-modal td:nth-child(6) { width: 400px;}
+
+
+
+  .table-modal {
+    table-layout: fixed;
+  }
+
+
+.nav .btn:nth-child(1){
+    background-color: #747474;
+    color: #fff;
+}
+
+
+.table-modal thead td {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+  }
