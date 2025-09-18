@@ -1,2 +1,7 @@
 # Entorno virtual
 venv/
+
+wapp/.env
+
+.env
+/wapp/.env

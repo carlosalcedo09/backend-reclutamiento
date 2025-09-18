@@ -1,12 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager as BaseUserManager
+from django.forms import ValidationError
 from django.utils import timezone
-
 
 class UserManager(BaseUserManager):
     def _create_user(self, username, email, password=None, **extra_fields):
         if not email:
-            raise ValueError('El campo Email es obligatorio')
+            raise ValueError("El campo Email es obligatorio")
         email = self.normalize_email(email)
         extra_fields.setdefault('is_active', True)
         user = self.model(username=username, email=email, **extra_fields)

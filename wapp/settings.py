@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 import os
 from django.templatetags.static import static
@@ -28,82 +29,84 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qiv+i&14p$z!@e2e0c(898f-6ofll&p=m_j*iv*7f##yn$+&pc'
+SECRET_KEY = "django-insecure-qiv+i&14p$z!@e2e0c(898f-6ofll&p=m_j*iv*7f##yn$+&pc"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 
 # Application definition
 
-BASE_APPS  = [
-    "unfold", 
+BASE_APPS = [
+    "unfold",
     "unfold.contrib.filters",
     "unfold.contrib.import_export",
     "unfold.contrib.forms",
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework_simplejwt",
 ]
 
 
 LOCAL_APPS = [
-    'apps.users.apps.UsersConfig',
-    'apps.base.apps.BaseConfig',
-    'apps.candidate',
-    'apps.job',
-    'apps.maintenance',
+    "apps.users.apps.UsersConfig",
+    "apps.base.apps.BaseConfig",
+    "apps.candidate",
+    "apps.job",
+    "apps.maintenance",
 ]
 
 INSTALLED_APPS = BASE_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'wapp.urls'
+ROOT_URLCONF = "wapp.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'wapp.wsgi.application'
+WSGI_APPLICATION = "wapp.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DATABASE_ENGINE'),
-        'NAME': os.getenv('DATABASE_NAME'),
-        'USER': os.getenv('DATABASE_USER'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-        'HOST': os.getenv('DATABASE_HOST'),
-        'PORT': int(os.getenv('DATABASE_PORT')),
-        'CONN_MAX_AGE': 300
+    "default": {
+        "ENGINE": os.getenv("DATABASE_ENGINE"),
+        "NAME": os.getenv("DATABASE_NAME"),
+        "USER": os.getenv("DATABASE_USER"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD"),
+        "HOST": os.getenv("DATABASE_HOST"),
+        "PORT": int(os.getenv("DATABASE_PORT")),
+        "CONN_MAX_AGE": 300,
     }
 }
 
@@ -113,16 +116,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -130,11 +133,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
 
-LANGUAGE_CODE = 'es-pe'
+LANGUAGE_CODE = "es-pe"
 
-TIME_ZONE = 'America/Lima'
+TIME_ZONE = "America/Lima"
 
 
 USE_I18N = True
@@ -145,14 +148,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_ROOT = os.getenv('STATIC_ROOT')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]
+STATIC_ROOT = os.getenv("STATIC_ROOT")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 
 UNFOLD = {
-    
     "SITE_TITLE": "Panel de Administración",
     "SITE_ICON": "",
     "SITE_HEADER": "Plataforma de reclutamiento",
@@ -161,8 +161,8 @@ UNFOLD = {
         lambda request: static("admin/css/overrides.css"),
     ],
     "LOGIN": {
-         "image": "https://www.finama.edu.br/tim.php?src=uploads/images/2021/06/o-papel-do-rh-na-transformacao-digital-1623245377.jpg&w=1920&h=1200&a=t",
-         #"redirect_after": lambda r: reverse_lazy("admin:project_project_changelist"),
+        "image": "https://www.finama.edu.br/tim.php?src=uploads/images/2021/06/o-papel-do-rh-na-transformacao-digital-1623245377.jpg&w=1920&h=1200&a=t",
+        # "redirect_after": lambda r: reverse_lazy("admin:project_project_changelist"),
     },
     "COLORS": {
         "primary": {
@@ -176,9 +176,8 @@ UNFOLD = {
             "700": "51 87 212",
             "800": "51 87 212",
             "900": "51 87 212",
-            "950": "51 87 212"
+            "950": "51 87 212",
         }
-
     },
     "SIDEBAR": {
         "show_search": False,
@@ -197,28 +196,25 @@ UNFOLD = {
                         "title": "Permisos",
                         "icon": "lock",
                         "link": reverse_lazy("admin:auth_group_changelist"),
-                    }
-                    
+                    },
                 ],
             },
             {
                 "title": "Gestión de Candidatos",
                 "separator": True,
                 "items": [
-                     {
+                    {
                         "title": "Candidatos",
                         "icon": "diversity_3",
                         "link": reverse_lazy("admin:candidate_candidate_changelist"),
                     },
-                    
                 ],
             },
-            
             {
                 "title": "Gestión de Ofertas laborales",
                 "separator": True,
                 "items": [
-                     {
+                    {
                         "title": "Posiciones",
                         "icon": "article_person",
                         "link": reverse_lazy("admin:job_jobpositions_changelist"),
@@ -231,21 +227,15 @@ UNFOLD = {
                     {
                         "title": "Postulaciones",
                         "icon": "engineering",
-                         "link": reverse_lazy("admin:job_jobapplications_changelist"),
+                        "link": reverse_lazy("admin:job_jobapplications_changelist"),
                     },
                 ],
             },
-
-            
             {
                 "title": "Gestión de Evaluaciones",
                 "separator": True,
-                "items": [
-                    
-                    
-                ],
+                "items": [],
             },
-
             {
                 "title": "Mantenimeinto",
                 "separator": True,
@@ -255,21 +245,19 @@ UNFOLD = {
                         "icon": "psychology",
                         "link": reverse_lazy("admin:maintenance_skill_changelist"),
                     },
-                    
-                     {
+                    {
                         "title": "Empresas",
                         "icon": "apartment",
                         "link": reverse_lazy("admin:maintenance_company_changelist"),
                     },
                 ],
             },
-        ]
-    }
+        ],
+    },
 }
 
 
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 STATIC_URL = "/static/"
 MEDIA_URL = "/media/"
@@ -277,7 +265,20 @@ MEDIA_URL = "/media/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-ICON_EDIT_URL = '/static/admin/img/visible.png'
+ICON_EDIT_URL = "/static/admin/img/visible.png"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    )
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}

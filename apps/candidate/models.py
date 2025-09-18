@@ -3,8 +3,10 @@ from apps.base.models import BaseModel
 from apps.maintenance.models import Skill
 from apps.candidate.choices import DocumentTypeChoices, SexoChoices, CountryChoices,EducationNivelChoices
 from apps.job.choices import TypeJobChoices
+from apps.users.models import User
 
 class Candidate(BaseModel):
+    user = models.ForeignKey(User, verbose_name="Cuenta del candidato", null=True, blank=True, on_delete=models.CASCADE, related_name="account_candidate")
     document_type = models.CharField(verbose_name="Tipo de documento", default=None, null=True, blank=True, max_length=30, choices=DocumentTypeChoices.choices)
     document_number = models.CharField('Código', max_length=10)
     country = models.CharField(verbose_name="País de procedencia", null=True, blank=True, default=None, max_length=100, choices=CountryChoices.choices)
