@@ -31,7 +31,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data["username"],
             email=validated_data["email"],
             password=validated_data["password"],
-            dni=validated_data.get("dni"),
+            dni=validated_data.get("document_number", ""),
         )
 
 

@@ -52,6 +52,7 @@ BASE_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    "corsheaders",
 ]
 
 
@@ -66,6 +67,7 @@ LOCAL_APPS = [
 INSTALLED_APPS = BASE_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # 👈 debe ir arriba de CommonMiddleware
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -94,6 +96,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "wapp.wsgi.application"
 
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "").split(",")
+
+# Si necesitas permitir cookies/sesiones entre dominios
+CORS_ALLOW_CREDENTIALS = True
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

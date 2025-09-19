@@ -13,7 +13,7 @@ class Candidate(BaseModel):
     photograph = models.ImageField(verbose_name="Fotografía", upload_to="candidates/photos/", blank=True, null=True)
     name = models.CharField(verbose_name="Nombre Completo", max_length=255)
     gender = models.CharField(verbose_name="Sexo", null=True, blank=True, default=None, max_length=30, choices=SexoChoices.choices)
-    birth_date = models.DateField(verbose_name='Fecha de nacimiento', help_text='Fecha de fallecimiento de candidato')
+    birth_date = models.DateField(verbose_name='Fecha de nacimiento', help_text='Fecha de nacimiento de candidato')
     education_level  = models.CharField(verbose_name='Nivel de educación', max_length=255, blank=True, null=True,choices=EducationNivelChoices.choices)
     location = models.CharField(verbose_name='Dirección', max_length=255, blank=True, null=True)
     short_bio = models.TextField(verbose_name='Breve biografía', blank=True, null=True)
