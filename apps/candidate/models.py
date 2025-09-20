@@ -29,7 +29,7 @@ class Candidate(BaseModel):
     class Meta:
         verbose_name='Candidato'
         verbose_name_plural= 'Candidatos'
-        ordering = ('created_at',)
+        ordering = ('-created_at',)
 
 
     def __str__(self):

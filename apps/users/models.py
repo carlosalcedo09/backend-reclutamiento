@@ -37,7 +37,7 @@ class User(AbstractUser):
     created_at = models.DateTimeField("Fecha de registro", auto_now_add=True, null=True)
     updated_at = models.DateTimeField("Última de modificación", auto_now=True, null=True)
     creator_user = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name='Usuario creador', null=True, blank=True)
-
+    last_password_change = models.DateTimeField("Último cambio de contraseña", default=timezone.now, null=True, blank=True)
     objects = UserManager()
 
     class Meta:

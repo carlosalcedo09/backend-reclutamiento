@@ -2,13 +2,33 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from apps.candidate.serializers import (
+    CandidateSerializer,
+    CandidateSkillSerializer,
+    EducationSerializer,
+    ExperienceSerializer,
+)
+
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    candidate = CandidateSerializer(
+        many=False, source="account_candidate.first", read_only=True
+    )
+
     class Meta:
         model = User
-        fields = ["id", "username", "email", "dni", "is_active", "created_at"]
+        fields = [
+            "id",
+            "username",
+            "email",
+            "dni",
+            "is_active",
+            "created_at",
+            "last_password_change",
+            "candidate",
+        ]
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -17,9 +37,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "email", "dni", "password"]
-        extra_kwargs = {
-            "email": {"required": True, "allow_blank": False}
-        }
+        extra_kwargs = {"email": {"required": True, "allow_blank": False}}
 
     def validate_email(self, value):
         if not value:
@@ -31,7 +49,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data["username"],
             email=validated_data["email"],
             password=validated_data["password"],
-            dni=validated_data.get("document_number", ""),
+            dni=validated_data.get("dni", ""),
         )
 
 
@@ -40,11 +58,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)  # tokens (refresh + access)
 
         # Datos adicionales del usuario
-        data.update({
-            "id": self.user.id,
-            "username": self.user.username,
-            "email": self.user.email,
-            "dni": self.user.dni,
-        })
+        data.update(
+            {
+                "id": self.user.id,
+                "username": self.user.username,
+                "email": self.user.email,
+                "dni": self.user.dni,
+            }
+        )
 
         return data

@@ -3,7 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-
+from django.utils import timezone
+from apps.candidate.models import Candidate
 from apps.candidate.serializers import CandidateSerializer
 
 from .serializers import (
@@ -13,6 +14,7 @@ from .serializers import (
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import status
+
 User = get_user_model()
 
 
@@ -26,9 +28,21 @@ class UserViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated()]
 
     # 🔹 Acción personalizada para registrar
-    @action(detail=False, methods=["post"], url_path="register", permission_classes=[AllowAny])
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="register",
+        permission_classes=[AllowAny],
+    )
     def register(self, request):
-        serializer = RegisterSerializer(data=request.data)
+        document_number = request.data.get("document_number")
+        if User.objects.filter(dni=document_number).exists():
+            return Response(
+                {"message": "Este DNI ya fue registrado"}, status=status.HTTP_200_OK
+            )
+        data = request.data.copy()
+        data["dni"] = document_number
+        serializer = RegisterSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
@@ -36,8 +50,8 @@ class UserViewSet(viewsets.ModelViewSet):
         candidate_data = {
             "user": user.id,
             "name": request.data.get("name"),
-            "document_type": request.data.get("dni"),
-            "document_number": request.data.get("document_number"),
+            "document_type": request.data.get("document_type"),
+            "document_number": document_number,
             "country": request.data.get("country"),
             "gender": request.data.get("gender"),
             "birth_date": request.data.get("birth_date"),
@@ -67,6 +81,49 @@ class UserViewSet(viewsets.ModelViewSet):
     def profile(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="change-password",
+        permission_classes=[IsAuthenticated],
+    )
+    def change_password(self, request):
+        user = request.user
+        current_password = request.data.get("current_password")
+        new_password = request.data.get("new_password")
+        confirm_password = request.data.get("confirm_password")
+
+        if not current_password or not new_password or not confirm_password:
+            return Response(
+                {"error": "Debes completar todos los campos"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validar contraseña actual
+        if not user.check_password(current_password):
+            return Response(
+                {"error": "La contraseña actual es incorrecta"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validar coincidencia nueva contraseña
+        if new_password != confirm_password:
+            return Response(
+                {"error": "La nueva contraseña y la confirmación no coinciden"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Cambiar la contraseña
+        user.set_password(new_password)
+        user.last_password_change = timezone.now()  # 🔹 Actualizamos la fecha
+
+        user.save()
+
+        return Response(
+            {"message": "Contraseña actualizada correctamente"},
+            status=status.HTTP_200_OK,
+        )
 
 
 # 🔹 Vista separada para login con JWT
