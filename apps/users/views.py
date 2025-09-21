@@ -79,7 +79,7 @@ class UserViewSet(viewsets.ModelViewSet):
     # 🔹 Acción personalizada para ver perfil
     @action(detail=False, methods=["get"], url_path="profile")
     def profile(self, request):
-        serializer = UserSerializer(request.user)
+        serializer = UserSerializer(request.user, context={"request": request})
         return Response(serializer.data)
 
     @action(
