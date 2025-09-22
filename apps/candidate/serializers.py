@@ -50,6 +50,7 @@ class CandidateSerializer(serializers.ModelSerializer):
             "name",
             "document_type",
             "document_number",
+            "photograph",
             "country",
             "gender",
             "birth_date",
