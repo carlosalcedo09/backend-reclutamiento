@@ -5,9 +5,18 @@ from django.conf import settings
 from unfold.decorators import display
 from apps.base.admin import BaseAdmin
 from unfold.admin import TabularInline
-from apps.job.models import JobPositions, JobOffers, JobRequirements, JobSkill, JobApplications, AplicationsAiAnalysis
+from apps.job.models import JobPositions, JobOffers, JobRequirements, JobSkill, JobApplications, AplicationsAiAnalysis, JobBenefits
 from apps.job.choices import  StatusChoices
 from django.template.response import TemplateResponse
+
+
+class JobBenefitsInline(TabularInline):
+    model = JobBenefits
+    extra = 0  
+    exclude =['created_at','state','creator_user']
+    readonly_fields = ()
+    show_change_link = True 
+
 
 class JobSkillInline(TabularInline):
     model = JobSkill
@@ -28,7 +37,7 @@ class JobOffersAdmin(BaseAdmin):
     search_fields = ('title',)
     exclude = ['state', 'creator_user']
     list_display_links = ['edit', 'title']
-    inlines = [JobSkillInline, JobRequirementsInline]
+    inlines = [JobSkillInline, JobRequirementsInline, JobBenefitsInline]
 
     def edit(self, obj):
         return format_html("<img src='{}'>", settings.ICON_EDIT_URL)
@@ -48,7 +57,7 @@ class JobOffersAdmin(BaseAdmin):
 class JobPositionsAdmin(BaseAdmin):
     list_display=('name','description','edit',)
     search_fields=('name',)
-    exclude = [ 'state', 'creator_user',]
+    exclude = [ 'state', 'creator_user', 'candidate_snapshot']
     list_display_links = ['edit','name']
     
     def edit(self, obj):

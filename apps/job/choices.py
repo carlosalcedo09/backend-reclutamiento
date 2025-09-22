@@ -4,6 +4,11 @@ class TypeJobChoices(TextChoices):
     PT = "Part-Time", "Part-Time"
     FT = "Full-Time", "Full-Time"
 
+class ModeChoices(TextChoices):
+    R ="Remoto", "Remoto"
+    P ="Presencial", "Presencial"
+    H = "Híbrido", "Híbrido"
+
 class StatusChoices(TextChoices):
     ENV = "Enviado", "Enviado"
     EVAL = "En evaluación", "En evaluación"

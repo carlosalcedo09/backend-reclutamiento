@@ -37,7 +37,7 @@ class CandidateAdmin(BaseAdmin):
     inlines = [SkillInline,ExperienceInline, EducationInline]
     fieldsets = [
         ('Información personal', {
-            'fields': ['document_type', 'document_number','photograph','name','gender','birth_date','country'],
+            'fields': ['document_type', 'document_number','photograph','name','gender','birth_date','country','user'],
         }),
          ('Información laboral', {
             'fields': ['education_level','experience_years','has_recommendation','avaliability','short_bio','cv_file','portfolio_url', ],
