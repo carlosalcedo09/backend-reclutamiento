@@ -1,4 +1,4 @@
-from apps.job.models import JobOffers, JobRequirements, JobSkill, JobBenefits, JobApplications
+from apps.job.models import AplicationsAiAnalysis, JobOffers, JobRequirements, JobSkill, JobBenefits, JobApplications
 from rest_framework import serializers
 from apps.candidate.models import Candidate
 
@@ -73,3 +73,39 @@ class JobApplicationsSerializer(serializers.ModelSerializer):
             joboffers=joboffers,
             **validated_data
         )
+        
+class JobOffersNestedSerializer(serializers.ModelSerializer):
+    company_name = serializers.CharField(source="company.name", read_only=True)
+
+    class Meta:
+        model = JobOffers
+        fields = [
+            "id",
+            "title",
+            "description",
+            "location",
+            "employment_type",
+            "mode",
+            "salary_min",
+            "salary_max",
+            "company_name",
+        ]
+
+class AplicationsAiAnalysisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AplicationsAiAnalysis
+        fields = ["match_score", "status", "observation"]
+
+class JobApplicationsFullSerializer(serializers.ModelSerializer):
+    joboffers = JobOffersNestedSerializer(read_only=True)
+    analysis = AplicationsAiAnalysisSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = JobApplications
+        fields = [
+            "id",
+            "status",
+            "created_at",
+            "joboffers",
+            "analysis",
+        ]

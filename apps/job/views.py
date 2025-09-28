@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from apps.job.models import JobOffers, JobApplications
 from apps.candidate.models import Candidate
-from apps.job.serializers import JobOffersSerializer, JobApplicationsSerializer
+from apps.job.serializers import JobApplicationsFullSerializer, JobOffersSerializer, JobApplicationsSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
@@ -33,3 +33,19 @@ class JobApplicationsViewSet(viewsets.ModelViewSet):
         except Candidate.DoesNotExist:
             return JobApplications.objects.none()  
         return JobApplications.objects.filter(candidate=candidate)
+    
+    @action(detail=False, methods=["get"], url_path="my-applications")
+    def my_applications(self, request):
+        """
+        📌 Devuelve las postulaciones del candidato logueado con:
+        - Información detallada de la oferta
+        - Estado de postulación
+        - Análisis de IA (si existe)
+        """
+        candidate = Candidate.objects.filter(user=request.user).first()
+        if not candidate:
+            return Response({"detail": "No se encontró candidato asociado."}, status=status.HTTP_404_NOT_FOUND)
+
+        apps = JobApplications.objects.filter(candidate=candidate).prefetch_related("analysis", "joboffers__company")
+        serializer = JobApplicationsFullSerializer(apps, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

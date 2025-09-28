@@ -17,5 +17,5 @@ router.register(r"candidate-skills", CandidateSkillViewSet, basename="candidate-
 router.register(r"experiences", ExperienceViewSet, basename="experiences")
 router.register(r"educations", EducationViewSet, basename="educations")
 router.register(r"joboffers", JobOffersViewSet, basename="joboffers")
-router.register(r"jobaplications", JobApplicationsViewSet, basename="jobaplications")
+router.register(r"jobapplications", JobApplicationsViewSet, basename="jobaplications")
 endpoints = router.urls
