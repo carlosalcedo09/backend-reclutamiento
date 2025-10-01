@@ -2,7 +2,13 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
 from apps.base.admin import BaseAdmin
-from apps.candidate.models import Candidate, Experience, Education, CandidateSkill
+from apps.candidate.models import (
+    Candidate,
+    Certificates,
+    Experience,
+    Education,
+    CandidateSkill,
+)
 from unfold.admin import TabularInline
 
 
@@ -30,6 +36,14 @@ class EducationInline(TabularInline):
     show_change_link = True
 
 
+class CertificatesInline(TabularInline):
+    model = Certificates
+    extra = 0
+    exclude = ["created_at", "state", "creator_user"]
+    readonly_fields = ()
+    show_change_link = True
+
+
 class CandidateAdmin(BaseAdmin):
     list_display = (
         "image",
@@ -49,14 +63,37 @@ class CandidateAdmin(BaseAdmin):
         "creator_user",
     ]
     list_display_links = ["edit", "image"]
-    inlines = [SkillInline, ExperienceInline, EducationInline]
+    inlines = [SkillInline, ExperienceInline, EducationInline, CertificatesInline]
     fieldsets = [
-        ('Información personal', {
-            'fields': ['document_type', 'document_number','photograph','name','gender','birth_date','country','user'],
-        }),
-         ('Información laboral', {
-            'fields': ['education_level','experience_years','has_recommendation','avaliability','short_bio','cv_file','portfolio_url', ],
-        }),
+        (
+            "Información personal",
+            {
+                "fields": [
+                    "document_type",
+                    "document_number",
+                    "photograph",
+                    "name",
+                    "gender",
+                    "birth_date",
+                    "country",
+                    "user",
+                ],
+            },
+        ),
+        (
+            "Información laboral",
+            {
+                "fields": [
+                    "education_level",
+                    "has_recommendation",
+                    "availability",
+                    "short_bio",
+                    "cv_file",
+                    "linkedin_url",
+                    "portfolio_url",
+                ],
+            },
+        ),
     ]
 
     def edit(self, obj):

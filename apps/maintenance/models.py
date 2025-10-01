@@ -18,13 +18,13 @@ class Skill(BaseModel):
 
 class Company (BaseModel):
     name = models.CharField(verbose_name="Nombre de Compañia", max_length=100, unique=True)
-    legal_name = models.CharField(verbose_name="Nombre de Compañia", max_length=100, unique=True)
+    legal_name = models.CharField(verbose_name="Nombre de Legal de la Compañia", max_length=100, unique=True)
     tax_id =models.CharField(verbose_name="RUC", max_length=20, unique=True)
     industry = models.CharField(verbose_name="Industria", max_length=20, unique=True)
     address =  models.CharField(verbose_name="Dirección", max_length=20, unique=True)
     phone =models.CharField(verbose_name="Número telefónico", max_length=10, unique=True)
     email= models.EmailField(verbose_name="Correo electrónico", max_length=100, unique=True)
-    size = models.CharField(verbose_name="Tamao de empresa", max_length=20, choices=SizeChoices.choices)
+    size = models.CharField(verbose_name="Tamaño de la empresa", max_length=20, choices=SizeChoices.choices)
 
     class Meta:
         verbose_name='Empresa'

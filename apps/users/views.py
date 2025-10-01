@@ -58,7 +58,6 @@ class UserViewSet(viewsets.ModelViewSet):
             "education_level": request.data.get("education_level"),
             "location": request.data.get("location"),
             "short_bio": request.data.get("short_bio"),
-            "experience_years": request.data.get("experience_years"),
             "avaliability": request.data.get("avaliability"),
             "linkedin_url": request.data.get("linkedin_url"),
             "portfolio_url": request.data.get("portfolio_url"),
