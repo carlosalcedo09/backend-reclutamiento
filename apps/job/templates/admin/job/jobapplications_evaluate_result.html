@@ -1,103 +1,110 @@
 {% block content %}
 <style>
-    body {
-      position: relative;
-      background-image: url("https://img.freepik.com/foto-gratis/vista-lateral-mujeres-sonrientes-trabajando-juntas_23-2149871353.jpg");
-      background-size: cover;       
-      background-position: center;  
-      background-repeat: no-repeat; 
-      font-family: sans-serif;
-      min-height: 100vh;
-      margin: 0;
-    }
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 0;
-    }
-    .result-card {
-      position: relative;
-      z-index: 1;
-      background:#fff; 
-      padding:2rem; 
-      border-radius:12px; 
-      max-width:700px; 
-      min-width: 500px;
-      text-align:center; 
-      box-shadow:0 5px 20px rgba(0,0,0,0.2);
-      margin:auto;
-    }
-    table {
-      width:100%;
-      border-collapse: collapse;
-      margin-top: 1.5rem;
-      border-radius: 10px;   
-      overflow: hidden;  
-    }
-    th, td {
-      padding: 0.8rem;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-    }
-    th {
-      background: #003b99;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background: #f9f9f9;
-    }
-    .btn-back {
-      margin-top:1.5rem; 
-      background:#5bcdfa;  
-      text-decoration: none; 
-      color:white; 
-      padding:0.8rem 1.2rem; 
-      border-radius:6px; 
-      display:inline-block;
-    }
+	body {
+		position: relative;
+		background-image: url("https://img.freepik.com/foto-gratis/vista-lateral-mujeres-sonrientes-trabajando-juntas_23-2149871353.jpg");
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+		font-family: sans-serif;
+		min-height: 100vh;
+		margin: 0;
+	}
+	body::before {
+		content: "";
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.6);
+		z-index: 0;
+	}
+	.result-card {
+		position: relative;
+		z-index: 1;
+		background: #fff;
+		padding: 2rem;
+		border-radius: 12px;
+		max-width: 700px;
+		min-width: 500px;
+		text-align: center;
+		box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+		margin: auto;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-top: 1.5rem;
+		border-radius: 10px;
+		overflow: hidden;
+	}
+	th,
+	td {
+		padding: 0.8rem;
+		border-bottom: 1px solid #ddd;
+		text-align: left;
+	}
+	th {
+		background: #003b99;
+		color: white;
+	}
+	tr:nth-child(even) {
+		background: #f9f9f9;
+	}
+	.btn-back {
+		margin-top: 1.5rem;
+		background: #5bcdfa;
+		text-decoration: none;
+		color: white;
+		padding: 0.8rem 1.2rem;
+		border-radius: 6px;
+		display: inline-block;
+	}
 </style>
 
-<div style="display:flex; align-items:center; justify-content:center; height:100vh;">
-    <div class="result-card">
-        <h2 style="color: #003b99; font-size:1.5rem;">Evaluación completada</h2>
-        <p style="margin-top:1rem;">Se evaluaron todas las postulaciones para la oferta:</p>
-        <p><strong>{{ offer.title }}</strong></p>
+<div
+	style="
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+	">
+	<div class="result-card">
+		<h2 style="color: #003b99; font-size: 1.5rem">Evaluación completada</h2>
+		<p style="margin-top: 1rem">
+			Se evaluaron todas las postulaciones para la oferta:
+		</p>
+		<p><strong>{{ offer.title }}</strong></p>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Candidato</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-    {% for application in applications %}
-    <tr>
-        <td>{{ application.candidate.name }}</td>
-        <td>
-            {% with analysis=application.analysis.last %}
-                {% if analysis and analysis.status == "apto" %}
-                    Apto
-                {% else %}
-                    No Apto
-                {% endif %}
-            {% endwith %}
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="2" style="text-align:center;">No hay postulaciones evaluadas.</td>
-    </tr>
-    {% endfor %}
-</tbody>
-        </table>
+		<table>
+			<thead>
+				<tr>
+					<th>Candidato</th>
+					<th>Estado</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for app_data in applications %}
+				<tr>
+					<td>{{ app_data.application.candidate.name }}</td>
+					<td>
+						{% if app_data.analysis %} 
+              {{ app_data.analysis.get_status_display }} 
+            {% else %} 
+              En evaluación 
+            {% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
 
-        <a href="{% url 'admin:job_jobapplications_changelist' %}?joboffers__id__exact={{ offer.id }}" 
-           class="btn-back">
-            Volver a postulaciones
-        </a>
-    </div>
+		<a
+			href="{% url 'admin:job_jobapplications_changelist' %}?joboffers__id__exact={{ offer.id }}"
+			class="btn-back">
+			Volver a postulaciones
+		</a>
+	</div>
 </div>
 {% endblock %}

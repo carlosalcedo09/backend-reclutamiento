@@ -11,7 +11,7 @@ from apps.job.models import (
     JobRequirements,
     JobSkill,
     JobApplications,
-    AplicationsAiAnalysis,
+    ApplicationsAiAnalysis,
     JobBenefits,
 )
 from apps.job.choices import StatusChoices
@@ -19,8 +19,10 @@ from django.template.response import TemplateResponse
 from django.utils import timezone
 import json
 import requests
+from django.db.models import Prefetch
 
-from apps.job.utils.utils import calculate_experience_years
+from apps.job.utils.utils import calculate_experience_years, decide_status
+
 
 class JobBenefitsInline(TabularInline):
     model = JobBenefits
@@ -94,7 +96,7 @@ class JobPositionsAdmin(BaseAdmin):
 
 
 class AplicationsAiAnalysisInline(TabularInline):
-    model = AplicationsAiAnalysis
+    model = ApplicationsAiAnalysis
     extra = 0
     exclude = ["created_at", "state", "creator_user"]
     readonly_fields = ()
@@ -257,17 +259,56 @@ class JobApplicationsAdmin(BaseAdmin):
                 }
             )
 
-        print(json.dumps(payload, indent=4, ensure_ascii=False))
+        #print(json.dumps(payload, indent=4, ensure_ascii=False))
 
         try:
             response = requests.post(
                 "http://127.0.0.1:8001/api/evaluate",
-                json=payload,        # el dict de Python
-                timeout=60
+                json=payload,  # el dict de Python
+                timeout=60,
             )
             response.raise_for_status()  # lanza excepción si hay error HTTP
-            result = response.json()     # la respuesta en JSON
-            print("Respuesta del backend IA:", json.dumps(result, indent=4, ensure_ascii=False))
+            result = response.json()  # la respuesta en JSON
+            # print(
+            #     "Respuesta del backend IA:",
+            #     json.dumps(result, indent=4, ensure_ascii=False),
+            # )
+            for c in result.get("candidates", []):
+                app = applications.get(
+                    candidate__id=c["id"]
+                )  # relación con la postulación
+                score = c.get("fairness_overall_score", 0)
+
+                status = decide_status(score)
+
+                ApplicationsAiAnalysis.objects.create(
+                    jobApplications=app,
+                    job_match_score=c.get("job_match_score"),
+                    semantic_score=c.get("semantic_score"),
+                    structural_score=c.get("structural_score"),
+                    overall_score=score,
+                    fairness_structural_score=c.get("fairness_structural_score"),
+                    fairness_overall_score=c.get("fairness_overall_score"),
+                    fairness_overall_delta=c.get("fairness_overall_delta"),
+                    structural_breakdown=c.get("structural_breakdown"),
+                    fairness_groups=c.get("fairness_groups"),
+                    status=status,
+                    observation=c.get("decision_label"),  # IA ya devuelve un texto
+                )
+
+                # Opcional: actualizar la postulación principal con el estado
+                app.status = status
+                app.save(update_fields=["status"])
+            applications = (
+                JobApplications.objects.filter(joboffers=offer)
+                .select_related("candidate")
+                .prefetch_related(
+                    Prefetch(
+                        "analysis",
+                        queryset=ApplicationsAiAnalysis.objects.order_by("-created_at"),
+                    )
+                )
+            )
             self.message_user(
                 request,
                 f"{applications.count()} postulaciones evaluadas con éxito.",
@@ -276,10 +317,16 @@ class JobApplicationsAdmin(BaseAdmin):
         except requests.RequestException as e:
             print("Error en la petición a IA:", str(e))
             result = {}
-            
+
         context = {
             "offer": offer,
-            "applications": applications,
+            "applications": [
+                {
+                    "application": app,
+                    "analysis": app.analysis.first() if app.analysis.exists() else None,
+                }
+                for app in applications
+            ],
         }
 
         return TemplateResponse(

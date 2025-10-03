@@ -2,6 +2,8 @@ import base64
 from datetime import date
 import requests
 
+from apps.job.choices import ResultChoices
+
 API_URL = "http://localhost:8000/api/evaluate"
 
 def base64_pdf(path: str | None) -> str | None:
@@ -24,3 +26,11 @@ def calculate_experience_years(candidate):
     # Convertir días a años (aprox 365 días por año)
     total_years = total_days / 365
     return round(total_years, 1)  # por ejemplo 3.5 años
+
+def decide_status(score: float) -> str:
+    if score >= 75:
+        return ResultChoices.AP  # Aprobado, recomendado
+    elif score >= 55:
+        return ResultChoices.AP  # Aprobado, competitivo
+    else:
+        return ResultChoices.RC  # Rechazado

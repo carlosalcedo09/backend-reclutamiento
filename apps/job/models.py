@@ -225,32 +225,42 @@ class JobApplications(BaseModel):
         super().save(*args, **kwargs)
 
 
-class AplicationsAiAnalysis(BaseModel):
+class ApplicationsAiAnalysis(BaseModel):
     jobApplications = models.ForeignKey(
         JobApplications,
-        verbose_name="Posición",
+        verbose_name="Postulación",
         on_delete=models.CASCADE,
         related_name="analysis",
     )
-    match_score = models.DecimalField(
-        verbose_name="Resultado de evaluación",
-        max_digits=5,
-        decimal_places=5,
-        null=True,
-        blank=True,
-    )
+
+    # Puntajes principales
+    job_match_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    semantic_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    structural_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    overall_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+
+    # Evaluación de equidad
+    fairness_structural_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    fairness_overall_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    fairness_overall_delta = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+
+    # JSON con detalle de breakdown
+    structural_breakdown = models.JSONField(null=True, blank=True)
+    fairness_groups = models.JSONField(null=True, blank=True)
+
+    # Resultado final
     status = models.CharField(
-        verbose_name="Resultado de evaluación",
+        verbose_name="Resultado",
         max_length=255,
         null=True,
         blank=True,
         choices=ResultChoices.choices,
+        default=ResultChoices.EA
     )
     observation = models.CharField(
         verbose_name="Observaciones", max_length=500, null=True, blank=True
     )
-
     class Meta:
         verbose_name = "Análisis de Postulación"
-        verbose_name_plural = "Análisis de Postulación"
+        verbose_name_plural = "Análisis de Postulaciones"
         ordering = ("created_at",)

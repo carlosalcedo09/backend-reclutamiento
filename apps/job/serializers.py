@@ -1,4 +1,4 @@
-from apps.job.models import AplicationsAiAnalysis, JobOffers, JobRequirements, JobSkill, JobBenefits, JobApplications
+from apps.job.models import ApplicationsAiAnalysis, JobOffers, JobRequirements, JobSkill, JobBenefits, JobApplications
 from rest_framework import serializers
 from apps.candidate.models import Candidate
 
@@ -93,7 +93,7 @@ class JobOffersNestedSerializer(serializers.ModelSerializer):
 
 class AplicationsAiAnalysisSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AplicationsAiAnalysis
+        model = ApplicationsAiAnalysis
         fields = ["match_score", "status", "observation"]
 
 class JobApplicationsFullSerializer(serializers.ModelSerializer):
