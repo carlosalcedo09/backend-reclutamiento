@@ -17,6 +17,9 @@ class CountryChoices(TextChoices):
     PERU = "Perú", "Perú"
     CHILE = "Chile", "Chile"
     ECUADOR = "Ecuador", "Ecuador"
+    ARGENTINA = "Argentina", "Argentina"
+    ESPAÑA = "España", "España"
+    GUAYAQUIL = "Guayaquil", "Guayaquil"
 
 
 class EducationNivelChoices(TextChoices):
@@ -25,6 +28,7 @@ class EducationNivelChoices(TextChoices):
     DI = "Diplomado", "Diplomado"
     MA = "Maestría", "Maestría"
     DO = "Doctorado", "Doctorado"
+    LI = "Licenciado", "Licenciado"
 
 
 class ProficiencyChoices(IntegerChoices):

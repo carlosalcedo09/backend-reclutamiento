@@ -52,7 +52,10 @@ class Candidate(BaseModel):
         choices=SexoChoices.choices,
     )
     birth_date = models.DateField(
-        verbose_name="Fecha de nacimiento", help_text="Fecha de nacimiento de candidato"
+        verbose_name="Fecha de nacimiento",
+        help_text="Fecha de nacimiento de candidato",
+        null=True,
+        blank=True,
     )
     education_level = models.CharField(
         verbose_name="Nivel de educación",
