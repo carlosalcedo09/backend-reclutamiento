@@ -20,6 +20,8 @@ class CountryChoices(TextChoices):
     ARGENTINA = "Argentina", "Argentina"
     ESPAÑA = "España", "España"
     GUAYAQUIL = "Guayaquil", "Guayaquil"
+    COLOMBIA = "Colombia", "Colombia"
+    BOLIVIA = "Bolivia", "Bolivia"
 
 
 class EducationNivelChoices(TextChoices):
@@ -29,6 +31,7 @@ class EducationNivelChoices(TextChoices):
     MA = "Maestría", "Maestría"
     DO = "Doctorado", "Doctorado"
     LI = "Licenciado", "Licenciado"
+    TC = "Tecnico", "Tecnico"
 
 
 class ProficiencyChoices(IntegerChoices):
