@@ -224,7 +224,43 @@ class JobApplications(BaseModel):
 
         super().save(*args, **kwargs)
 
+class TimeMetrics(models.Model):
+    job_application_batch = models.ForeignKey(
+        JobApplications,
+        on_delete=models.CASCADE,
+        related_name="time_metrics",
+        verbose_name="Postulación / Lote",
+        null=True,
+        blank=True,
+    )
+    request_id = models.CharField("Identificador de la ejecución", max_length=64, unique=True, db_index=True)
+    candidate_count = models.PositiveIntegerField("CVs procesados", default=0)
 
+    started_at = models.DateTimeField("Inicio de la evaluación", null=True, blank=True)
+    finished_at = models.DateTimeField("Fin de la evaluación", null=True, blank=True)
+
+    processing_time_seconds = models.DecimalField("Tiempo total (s)", max_digits=10, decimal_places=4)
+    processing_time_per_candidate = models.DecimalField("Tiempo promedio por CV (s)", max_digits=10, decimal_places=4)
+
+    candidate_processing_times = models.JSONField(
+        "Duración por CV",
+        help_text="Lista de objetos {id, name, processing_time_seconds}",
+        null=True,
+        blank=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Métrica de tiempo"
+        verbose_name_plural = "Métricas de tiempo"
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return f"{self.request_id} ({self.processing_time_seconds}s)"
+
+    def processing_time_minutes(self):
+        return float(self.processing_time_seconds) / 60 if self.processing_time_seconds else 0.0
+    
 class ApplicationsAiAnalysis(BaseModel):
     jobApplications = models.ForeignKey(
         JobApplications,
@@ -260,7 +296,24 @@ class ApplicationsAiAnalysis(BaseModel):
     observation = models.CharField(
         verbose_name="Observaciones", max_length=500, null=True, blank=True
     )
+    
+    processing_start_time = models.TimeField(
+        verbose_name="Hora de inicio de evaluación", null=True, blank=True
+    )
+    processing_end_time = models.TimeField(
+        verbose_name="Hora de fin de evaluación", null=True, blank=True
+    )
+    processing_time_minutes = models.DecimalField(
+        verbose_name="Duración de evaluación (minutos)",
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    
+    
     class Meta:
         verbose_name = "Análisis de Postulación"
         verbose_name_plural = "Análisis de Postulaciones"
         ordering = ("created_at",)
+        

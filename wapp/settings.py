@@ -235,6 +235,7 @@ UNFOLD = {
                         "icon": "engineering",
                         "link": reverse_lazy("admin:job_jobapplications_changelist"),
                     },
+                    
                 ],
             },
             {

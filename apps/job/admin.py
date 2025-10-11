@@ -1,3 +1,4 @@
+import uuid
 from django.urls import reverse
 from django.contrib import admin, messages
 from django.utils.html import format_html
@@ -13,6 +14,7 @@ from apps.job.models import (
     JobApplications,
     ApplicationsAiAnalysis,
     JobBenefits,
+    TimeMetrics,
 )
 from apps.job.choices import StatusChoices
 from django.template.response import TemplateResponse
@@ -21,7 +23,7 @@ import json
 import requests
 from django.db.models import Prefetch
 
-from apps.job.utils.utils import calculate_experience_years, decide_status
+from apps.job.utils.utils import base64_pdf, calculate_experience_years, decide_status, parse_time_str
 
 
 class JobBenefitsInline(TabularInline):
@@ -46,7 +48,6 @@ class JobRequirementsInline(TabularInline):
     exclude = ["created_at", "state", "creator_user"]
     readonly_fields = ()
     show_change_link = True
-
 
 class JobOffersAdmin(BaseAdmin):
     list_display = (
@@ -245,6 +246,7 @@ class JobApplicationsAdmin(BaseAdmin):
                     "certifications_count": candidate.certificates.count(),
                     "languages": languages_detail,
                     "ofimatic": ofimatic_detail,
+                    "cv_pdf_base64": base64_pdf(candidate.cv_file),
                     "university_name": (
                         candidate.educations.first().institution
                         if candidate.educations.exists()
@@ -265,15 +267,24 @@ class JobApplicationsAdmin(BaseAdmin):
             response = requests.post(
                 "http://127.0.0.1:8001/api/evaluate",
                 json=payload,  # el dict de Python
-                timeout=60,
+                timeout=180,
             )
             response.raise_for_status()  # lanza excepción si hay error HTTP
             result = response.json()  # la respuesta en JSON
-            # print(
-            #     "Respuesta del backend IA:",
-            #     json.dumps(result, indent=4, ensure_ascii=False),
-            # )
+            # print("\n🧾 RESUMEN FINAL DE TIEMPOS (FastAPI):")
+            # for c in result.get("candidates", []):
+            #     print({
+            #         "name": c.get("name"),
+            #         "processing_start_time": c.get("processing_start_time"),
+            #         "processing_end_time": c.get("processing_end_time"),
+            #         "processing_time_seconds": c.get("processing_time_seconds"),
+            #     })
+
             for c in result.get("candidates", []):
+                # print(f"⏱ Parseando tiempos de: {c.get('name')}")
+                # print(f"   Raw start: {repr(c.get('processing_start_time'))}")
+                # print(f"   Raw end: {repr(c.get('processing_end_time'))}")
+                # print(f"   Raw seconds: {repr(c.get('processing_time_seconds'))}")
                 app = applications.get(
                     candidate__id=c["id"]
                 )  # relación con la postulación
@@ -293,7 +304,12 @@ class JobApplicationsAdmin(BaseAdmin):
                     structural_breakdown=c.get("structural_breakdown"),
                     fairness_groups=c.get("fairness_groups"),
                     status=status,
-                    observation=c.get("decision_label"),  # IA ya devuelve un texto
+                    observation=c.get("decision_label"),
+                    processing_start_time=parse_time_str(c.get("processing_start_time")),
+                    processing_end_time=parse_time_str(c.get("processing_end_time")),
+                    processing_time_minutes=round(
+                        float(c.get("processing_time_seconds", 0)) / 60, 2
+                    ),
                 )
 
                 # Opcional: actualizar la postulación principal con el estado
