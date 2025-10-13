@@ -76,6 +76,7 @@ class CandidateAdmin(BaseAdmin):
                     "gender",
                     "birth_date",
                     "country",
+                    "experience_years",
                     "user",
                 ],
             },
@@ -96,6 +97,15 @@ class CandidateAdmin(BaseAdmin):
         ),
     ]
 
+    def save_related(self, request, form, formsets, change):
+        """
+        Este método se ejecuta DESPUÉS de guardar los inlines.
+        Ideal para actualizar datos derivados del conjunto.
+        """
+        super().save_related(request, form, formsets, change)
+        candidate = form.instance
+        candidate.update_experience_years()
+        
     def edit(self, obj):
         return format_html("<img src={icon_url}>", icon_url=settings.ICON_EDIT_URL)
 

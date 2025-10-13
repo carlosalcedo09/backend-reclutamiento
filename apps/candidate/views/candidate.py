@@ -24,7 +24,7 @@ class CandidateViewSet(viewsets.ModelViewSet):
     def update_profile(self, request):
         # Retorna el candidato del usuario logueado y permite patch
         candidate = self.get_queryset().first()
-        serializer = CandidateSerializer(candidate, data=request.data, partial=True)
+        serializer = CandidateSerializer(candidate, data=request.data, partial=True, context={"request": request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

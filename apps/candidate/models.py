@@ -72,9 +72,9 @@ class Candidate(BaseModel):
     cv_file = models.FileField(upload_to="candidates/cv/", blank=True, null=True)
     linkedin_url = models.URLField(blank=True, null=True)
     portfolio_url = models.URLField(blank=True, null=True)
-    # experience_years = models.CharField(
-    #     verbose_name="Años de experiencia", blank=True, null=True, default=0
-    # )
+    experience_years = models.CharField(
+        verbose_name="Años de experiencia", blank=True, null=True, default=0
+    )
     has_recommendation = models.BooleanField(
         verbose_name="¿Recomendación?", blank=True, null=True, default=False
     )
@@ -93,7 +93,28 @@ class Candidate(BaseModel):
     def __str__(self):
         return self.name
 
+    def update_experience_years(self):
+        from datetime import date
 
+        total_days = 0
+        today = date.today()
+
+        for exp in self.experiences.all():
+            if not exp.start_date:
+                continue
+
+            end = exp.end_date or today
+            if end < exp.start_date:
+                continue
+
+            total_days += (end - exp.start_date).days
+
+        total_years = total_days / 365 if total_days > 0 else 0.0
+        if total_years < 1 and self.experiences.exists():
+            total_years = 1.0
+
+        self.experience_years = round(total_years, 1)
+        self.save(update_fields=["experience_years"])
 class CandidateSkill(BaseModel):
     candidate = models.ForeignKey(
         Candidate, on_delete=models.CASCADE, related_name="skills"

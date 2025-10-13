@@ -26,7 +26,7 @@ class JobPositions(BaseModel):
 
 class JobOffers(BaseModel):
     title = models.CharField(verbose_name="Nombre de oferta laboral", max_length=255)
-    description = models.TextField(verbose_name="Descripción de oferta", max_length=255)
+    description = models.TextField(verbose_name="Descripción de oferta")
     job_position = models.ForeignKey(
         JobPositions,
         verbose_name="Posición",
@@ -304,7 +304,7 @@ class ApplicationsAiAnalysis(BaseModel):
         verbose_name="Hora de fin de evaluación", null=True, blank=True
     )
     processing_time_minutes = models.DecimalField(
-        verbose_name="Duración de evaluación (minutos)",
+        verbose_name="Duración de evaluación (segundos)",
         max_digits=8,
         decimal_places=2,
         null=True,
@@ -317,3 +317,30 @@ class ApplicationsAiAnalysis(BaseModel):
         verbose_name_plural = "Análisis de Postulaciones"
         ordering = ("created_at",)
         
+class EvaluationSummary(models.Model):
+    job_offer = models.ForeignKey(
+        "JobOffers",
+        on_delete=models.CASCADE,
+        related_name="evaluation_summaries"
+    )
+    fecha = models.DateField()
+    criterio = models.CharField(max_length=100)
+    grupo_protegido = models.CharField(max_length=100)
+    total_cvs_gp = models.PositiveIntegerField()
+    cvs_preseleccionados_gp = models.PositiveIntegerField()
+    tasa_seleccion_gp = models.FloatField()
+    grupo_referente = models.CharField(max_length=100)
+    total_cvs_gr = models.PositiveIntegerField()
+    cvs_preseleccionados_gr = models.PositiveIntegerField()
+    tasa_seleccion_gr = models.FloatField()
+    spd = models.FloatField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Resumen de selección"
+        verbose_name_plural = "Resumenes de selección"
+
+
+    def __str__(self):
+        return f"{self.criterio} ({self.fecha})"
