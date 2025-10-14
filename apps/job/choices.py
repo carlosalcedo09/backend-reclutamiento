@@ -17,6 +17,10 @@ class StatusChoices(TextChoices):
     EVAL = "En evaluación", "En evaluación"
     PRO = "Procesado", "Procesado"
 
+class StatusInterviewChoices(TextChoices):
+    CTR = "Contratado", "Contratado"
+    PSE = "Pasa entrevista", "Pasa entrevista"
+    NPE = "No pasa entrevista", "No pasa entrevista"
 
 class ResultChoices(TextChoices):
     DS = "Desconocido", "Desconocido"

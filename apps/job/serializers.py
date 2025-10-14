@@ -94,7 +94,7 @@ class JobOffersNestedSerializer(serializers.ModelSerializer):
 class AplicationsAiAnalysisSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApplicationsAiAnalysis
-        fields = ["match_score", "status", "observation"]
+        fields = '__all__'
 
 class JobApplicationsFullSerializer(serializers.ModelSerializer):
     joboffers = JobOffersNestedSerializer(read_only=True)

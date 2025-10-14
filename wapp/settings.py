@@ -239,6 +239,11 @@ UNFOLD = {
                         "title": "SPD",
                         "icon": "person",
                         "link": reverse_lazy("admin:job_evaluationsummary_changelist")
+                    },
+                    {
+                        "title": "Exactitud",
+                        "icon": "target",
+                        "link": reverse_lazy("admin:job_accuracymetrics_changelist")
                     }
                 ],
             },

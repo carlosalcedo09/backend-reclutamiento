@@ -1,3 +1,4 @@
+from datetime import date
 import uuid
 from django.urls import reverse
 from django.contrib import admin, messages
@@ -7,6 +8,7 @@ from unfold.decorators import display
 from apps.base.admin import BaseAdmin
 from unfold.admin import TabularInline
 from apps.job.models import (
+    AccuracyMetrics,
     EvaluationSummary,
     JobPositions,
     JobOffers,
@@ -23,6 +25,7 @@ from django.utils import timezone
 import json
 import requests
 from django.db.models import Prefetch
+from django.db.models.functions import TruncDate
 
 from apps.job.utils.utils import (
     base64_pdf,
@@ -140,12 +143,17 @@ class EvaluationSummaryAdmin(BaseAdmin):
     )
 
 
+class AccuracyMetricsAdmin(BaseAdmin):
+    model = AccuracyMetrics
+
+
 class JobApplicationsAdmin(BaseAdmin):
     list_display = (
         "created_at",
         "get_candidate_name",
         "joboffers",
         "show_status_customized_color",
+        "status_interview",
         "edit",
     )
     search_fields = (
@@ -166,7 +174,7 @@ class JobApplicationsAdmin(BaseAdmin):
     edit.short_description = "->"
 
     @display(
-        description="Estado",
+        description="Estado de la evaluación",
         ordering="status",
         label={
             "ENV": "warning",
@@ -195,7 +203,7 @@ class JobApplicationsAdmin(BaseAdmin):
         ]
         return custom_urls + urls
 
-    # DO :: EVALUACION
+    # EVALUACION
     def evaluate_offer(self, request, offer_id):
         offer = JobOffers.objects.get(pk=offer_id)
         applications = (
@@ -383,6 +391,29 @@ class JobApplicationsAdmin(BaseAdmin):
                         spd=summary.get("spd") or 0,
                     )
 
+            # === GUARDAR MÉTRICAS DE EXACTITUD ===
+            dates = (
+                JobApplications.objects.filter(joboffers=offer)
+                .annotate(post_date=TruncDate("created_at"))
+                .values_list("post_date", flat=True)
+                .distinct()
+            )
+
+            for d in dates:
+                apps_by_date = JobApplications.objects.filter(
+                    joboffers=offer, created_at__date=d
+                )
+                if not apps_by_date.exists():
+                    continue
+
+                metric, _ = AccuracyMetrics.objects.get_or_create(interview_date=d)
+                metric.job_applications.set(apps_by_date)
+                metric.calculate_metrics()
+
+                print(
+                    f"📊 Exactitud para {d}: {metric.selection_accuracy}% "
+                    f"({apps_by_date.count()} CVs)"
+                )
             applications = (
                 JobApplications.objects.filter(joboffers=offer)
                 .select_related("candidate")
@@ -432,3 +463,4 @@ admin.site.register(JobPositions, JobPositionsAdmin)
 admin.site.register(JobOffers, JobOffersAdmin)
 admin.site.register(JobApplications, JobApplicationsAdmin)
 admin.site.register(EvaluationSummary, EvaluationSummaryAdmin)
+admin.site.register(AccuracyMetrics, AccuracyMetricsAdmin)

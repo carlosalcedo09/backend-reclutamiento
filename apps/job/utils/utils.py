@@ -82,3 +82,5 @@ def parse_time_str(value):
 
     print(f"⚠️ No se pudo parsear la hora: '{value}'")
     return None
+
+

@@ -1,12 +1,20 @@
 from django.db import models
 from apps.base.models import BaseModel
 from apps.maintenance.models import Company, Skill
-from apps.job.choices import TypeJobChoices, StatusChoices, ResultChoices, ModeChoices
+from apps.job.choices import (
+    StatusInterviewChoices,
+    TypeJobChoices,
+    StatusChoices,
+    ResultChoices,
+    ModeChoices,
+)
 from apps.candidate.models import Candidate
 from django.contrib.postgres.fields import JSONField
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.utils import timezone
+from django.db.models import Q, Avg
 
 
 class JobPositions(BaseModel):
@@ -152,6 +160,13 @@ class JobApplications(BaseModel):
         blank=True,
         choices=StatusChoices.choices,
     )
+    status_interview = models.CharField(
+        verbose_name="Estado de la entrevista",
+        max_length=255,
+        null=True,
+        blank=True,
+        choices=StatusInterviewChoices.choices,
+    )
     candidate_snapshot = models.JSONField(
         verbose_name="Datos del candidato al momento de la postulación",
         blank=True,
@@ -224,6 +239,7 @@ class JobApplications(BaseModel):
 
         super().save(*args, **kwargs)
 
+
 class TimeMetrics(models.Model):
     job_application_batch = models.ForeignKey(
         JobApplications,
@@ -233,14 +249,20 @@ class TimeMetrics(models.Model):
         null=True,
         blank=True,
     )
-    request_id = models.CharField("Identificador de la ejecución", max_length=64, unique=True, db_index=True)
+    request_id = models.CharField(
+        "Identificador de la ejecución", max_length=64, unique=True, db_index=True
+    )
     candidate_count = models.PositiveIntegerField("CVs procesados", default=0)
 
     started_at = models.DateTimeField("Inicio de la evaluación", null=True, blank=True)
     finished_at = models.DateTimeField("Fin de la evaluación", null=True, blank=True)
 
-    processing_time_seconds = models.DecimalField("Tiempo total (s)", max_digits=10, decimal_places=4)
-    processing_time_per_candidate = models.DecimalField("Tiempo promedio por CV (s)", max_digits=10, decimal_places=4)
+    processing_time_seconds = models.DecimalField(
+        "Tiempo total (s)", max_digits=10, decimal_places=4
+    )
+    processing_time_per_candidate = models.DecimalField(
+        "Tiempo promedio por CV (s)", max_digits=10, decimal_places=4
+    )
 
     candidate_processing_times = models.JSONField(
         "Duración por CV",
@@ -259,8 +281,13 @@ class TimeMetrics(models.Model):
         return f"{self.request_id} ({self.processing_time_seconds}s)"
 
     def processing_time_minutes(self):
-        return float(self.processing_time_seconds) / 60 if self.processing_time_seconds else 0.0
-    
+        return (
+            float(self.processing_time_seconds) / 60
+            if self.processing_time_seconds
+            else 0.0
+        )
+
+
 class ApplicationsAiAnalysis(BaseModel):
     jobApplications = models.ForeignKey(
         JobApplications,
@@ -270,15 +297,29 @@ class ApplicationsAiAnalysis(BaseModel):
     )
 
     # Puntajes principales
-    job_match_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    semantic_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    structural_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    overall_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    job_match_score = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True
+    )
+    semantic_score = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True
+    )
+    structural_score = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True
+    )
+    overall_score = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True
+    )
 
     # Evaluación de equidad
-    fairness_structural_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    fairness_overall_score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    fairness_overall_delta = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    fairness_structural_score = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True
+    )
+    fairness_overall_score = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True
+    )
+    fairness_overall_delta = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True
+    )
 
     # JSON con detalle de breakdown
     structural_breakdown = models.JSONField(null=True, blank=True)
@@ -291,12 +332,12 @@ class ApplicationsAiAnalysis(BaseModel):
         null=True,
         blank=True,
         choices=ResultChoices.choices,
-        default=ResultChoices.EA
+        default=ResultChoices.EA,
     )
     observation = models.CharField(
         verbose_name="Observaciones", max_length=500, null=True, blank=True
     )
-    
+
     processing_start_time = models.TimeField(
         verbose_name="Hora de inicio de evaluación", null=True, blank=True
     )
@@ -310,18 +351,16 @@ class ApplicationsAiAnalysis(BaseModel):
         null=True,
         blank=True,
     )
-    
-    
+
     class Meta:
         verbose_name = "Análisis de Postulación"
         verbose_name_plural = "Análisis de Postulaciones"
         ordering = ("created_at",)
-        
+
+
 class EvaluationSummary(models.Model):
     job_offer = models.ForeignKey(
-        "JobOffers",
-        on_delete=models.CASCADE,
-        related_name="evaluation_summaries"
+        "JobOffers", on_delete=models.CASCADE, related_name="evaluation_summaries"
     )
     fecha = models.DateField()
     criterio = models.CharField(max_length=100)
@@ -341,6 +380,80 @@ class EvaluationSummary(models.Model):
         verbose_name = "Resumen de selección"
         verbose_name_plural = "Resumenes de selección"
 
-
     def __str__(self):
         return f"{self.criterio} ({self.fecha})"
+
+
+class AccuracyMetrics(models.Model):
+    interview_date = models.DateField(
+        verbose_name="Fecha de evaluación",
+        default=timezone.now,
+        db_index=True
+    )
+
+    job_applications = models.ManyToManyField(
+        "JobApplications",
+        verbose_name="Postulaciones del día",
+        related_name="accuracy_metrics",
+        blank=True,
+    )
+
+    total_cvs = models.PositiveIntegerField(
+        verbose_name="N° CVs evaluados", default=0
+    )
+    total_cvs_selected = models.PositiveIntegerField(
+        verbose_name="N° CVs seleccionados (IA o reclutador)", default=0
+    )
+    total_cvs_passed_ef = models.PositiveIntegerField(
+        verbose_name="N° CVs que pasan a entrevista final (EF)", default=0
+    )
+
+    selection_accuracy = models.DecimalField(
+        verbose_name="Exactitud de selección (%)",
+        max_digits=6,
+        decimal_places=3,
+        null=True,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Exactitud de Selección"
+        verbose_name_plural = "Exactitudes de Selección"
+        ordering = ["-interview_date"]
+
+    def __str__(self):
+        return f"{self.interview_date} - Exactitud: {self.selection_accuracy or 0}%"
+
+    def calculate_metrics(self):
+
+        apps = self.job_applications.all()
+
+        self.total_cvs = apps.count()
+
+        self.total_cvs_selected = apps.filter(
+            analysis__status="Aprobado"
+        ).distinct().count()
+
+        self.total_cvs_passed_ef = apps.filter(
+            status_interview__in=["Pasa entrevista", "Contratado"]
+        ).distinct().count()
+
+        avg_score = (
+            apps.filter(analysis__overall_score__isnull=False)
+            .aggregate(avg=Avg("analysis__overall_score"))
+            .get("avg")
+        )
+        self.average_score = avg_score or 0
+
+        if self.total_cvs_selected > 0:
+            self.selection_accuracy = round(
+                (self.total_cvs_passed_ef / self.total_cvs_selected) * 100, 3
+            )
+        else:
+            self.selection_accuracy = 0
+
+        self.save()
+        return self.selection_accuracy
