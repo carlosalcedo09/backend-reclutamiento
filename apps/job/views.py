@@ -36,26 +36,28 @@ class JobApplicationsViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=["get"], url_path="my-applications")
     def my_applications(self, request):
-        """
-        📌 Devuelve las postulaciones del candidato logueado, 
-        con opción de filtrar por estado (?status=Aprobado,Rechazado).
-        """
         candidate = Candidate.objects.filter(user=request.user).first()
         if not candidate:
             return Response(
                 {"detail": "No se encontró candidato asociado."},
-                status=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_200_OK,
             )
 
-        queryset = JobApplications.objects.filter(candidate=candidate).prefetch_related(
-            "analysis", "joboffers__company"
+        queryset = (
+            JobApplications.objects.filter(candidate=candidate)
+            .prefetch_related("analysis", "joboffers__company")
         )
 
-        # ✅ Filtro opcional por estado
         status_filter = request.query_params.get("status")
         if status_filter:
             estados = [s.strip() for s in status_filter.split(",")]
-            queryset = queryset.filter(analysis__status__in=estados)
+            # 🔹 Filtramos en memoria según el último análisis
+            filtered = []
+            for app in queryset:
+                last_analysis = app.analysis.order_by("-created_at").first()
+                if last_analysis and last_analysis.status in estados:
+                    filtered.append(app)
+            queryset = filtered
 
         serializer = JobApplicationsFullSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

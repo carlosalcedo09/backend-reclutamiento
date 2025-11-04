@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from apps.candidate.models import Candidate
 from apps.candidate.serializers import CandidateSerializer
-
+from django.core.mail import send_mail
 from .serializers import (
     RegisterSerializer,
     UserSerializer,
@@ -14,6 +14,13 @@ from .serializers import (
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import status
+from django.utils.crypto import get_random_string
+from datetime import timedelta
+from apps.users.models import PasswordResetToken
+from django.conf import settings
+from datetime import timedelta
+from sendgrid.helpers.mail import Mail
+from sendgrid import SendGridAPIClient
 
 User = get_user_model()
 
@@ -23,7 +30,8 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def get_permissions(self):
-        if self.action in ["register", "login"]:
+        print(self.action)
+        if self.action in ["register", "login", "recovery_password", "reset_password_confirm"]:
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -121,6 +129,108 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(
             {"message": "Contraseña actualizada correctamente"},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False,methods=["post"],url_path="recovery-password", permission_classes=[AllowAny],)
+    def recovery_password(self, request):
+        email = request.data.get("email")
+
+        if not email:
+            return Response(
+                {"error": "El correo electrónico es obligatorio."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response(
+                {
+                    "message": "Si el correo está registrado, se enviará un enlace para restablecer la contraseña."
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        token = get_random_string(64)
+        expires_at = timezone.now() + timedelta(hours=1)
+
+        PasswordResetToken.objects.update_or_create(
+            user=user,
+            defaults={"token": token, "expires_at": expires_at},
+        )
+
+        reset_link = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+
+        subject = "Recupera tu contraseña"
+        html_content = f"""
+            <div style="font-family: Arial, sans-serif; color: #333;">
+                <h2>Hola {user.username},</h2>
+                <p>Recibiste este correo porque solicitaste restablecer tu contraseña.</p>
+                <p>Puedes hacerlo usando el siguiente enlace:</p>
+                <p>
+                    <a href="{reset_link}" style="background-color:#003b99; color:white; padding:10px 20px; text-decoration:none; border-radius:4px;">
+                        Restablecer contraseña
+                    </a>
+                </p>
+                <p>Este enlace expirará en 1 hora.</p>
+                <hr/>
+                <p style="font-size:12px; color:#888;">
+                    Si no solicitaste este cambio, puedes ignorar este mensaje.
+                </p>
+            </div>
+        """
+        try:
+            message = Mail(
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to_emails=email,
+                subject=subject,
+                html_content=html_content,
+            )
+            sg = SendGridAPIClient(settings.API_KEY_SMTP)
+            sg.send(message)
+        except Exception as e:
+            print("❌ Error enviando email:", str(e))
+            return Response(
+                {"error": "Error al enviar el correo de recuperación."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            {
+                "message": "Si el correo está registrado, se enviará un enlace para restablecer la contraseña."
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=["post"], url_path="confirm-password",)
+    def reset_password_confirm(self, request):
+        """
+        Restablecer la contraseña usando el token recibido por correo.
+        """
+        token = request.data.get("token")
+        new_password = request.data.get("new_password")
+
+        if not token or not new_password:
+            return Response(
+                {"error": "Token y nueva contraseña son requeridos."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reset_token = PasswordResetToken.objects.filter(token=token).first()
+        if not reset_token or not reset_token.is_valid():
+            return Response(
+                {"error": "Token inválido o expirado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = reset_token.user
+        user.set_password(new_password)
+        user.save()
+
+        reset_token.delete()  # invalidar token
+
+        return Response(
+            {"message": "Contraseña restablecida correctamente."},
             status=status.HTTP_200_OK,
         )
 

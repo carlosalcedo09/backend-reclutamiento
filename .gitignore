@@ -4,4 +4,4 @@ venv/
 wapp/.env
 
 .env
-/wapp/.env
+/wapp/.envsendgrid.env

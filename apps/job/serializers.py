@@ -109,3 +109,11 @@ class JobApplicationsFullSerializer(serializers.ModelSerializer):
             "joboffers",
             "analysis",
         ]
+        
+    def get_analysis(self, obj):
+        last_analysis = obj.analysis.order_by("-created_at").first()
+        return (
+            AplicationsAiAnalysisSerializer(last_analysis).data
+            if last_analysis
+            else None
+        )

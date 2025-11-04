@@ -116,7 +116,9 @@ DATABASES = {
     }
 }
 
-
+API_KEY_SMTP = os.getenv("API_KEY_SMTP", "")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "jinpachas@gmail.com")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -238,13 +240,13 @@ UNFOLD = {
                     {
                         "title": "SPD",
                         "icon": "person",
-                        "link": reverse_lazy("admin:job_evaluationsummary_changelist")
+                        "link": reverse_lazy("admin:job_evaluationsummary_changelist"),
                     },
                     {
                         "title": "Exactitud",
                         "icon": "target",
-                        "link": reverse_lazy("admin:job_accuracymetrics_changelist")
-                    }
+                        "link": reverse_lazy("admin:job_accuracymetrics_changelist"),
+                    },
                 ],
             },
             {
