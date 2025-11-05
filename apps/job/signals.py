@@ -4,6 +4,7 @@ from django.db.models.functions import TruncDate
 
 from apps.job.models import AccuracyMetrics, JobApplications
 
+
 @receiver(post_save, sender=JobApplications)
 def update_accuracy_on_status_change(sender, instance, **kwargs):
 

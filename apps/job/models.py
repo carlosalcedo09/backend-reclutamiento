@@ -440,7 +440,7 @@ class AccuracyMetrics(models.Model):
         self.total_cvs_passed_ef = apps.filter(
             status_interview__in=["Pasa entrevista", "Contratado"]
         ).distinct().count()
-
+        
         avg_score = (
             apps.filter(analysis__overall_score__isnull=False)
             .aggregate(avg=Avg("analysis__overall_score"))

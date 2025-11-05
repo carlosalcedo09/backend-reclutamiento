@@ -147,6 +147,8 @@ class AccuracyMetricsAdmin(BaseAdmin):
     model = AccuracyMetrics
 
 
+
+
 class JobApplicationsAdmin(BaseAdmin):
     list_display = (
         "created_at",
