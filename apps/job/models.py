@@ -386,9 +386,7 @@ class EvaluationSummary(models.Model):
 
 class AccuracyMetrics(models.Model):
     interview_date = models.DateField(
-        verbose_name="Fecha de evaluación",
-        default=timezone.now,
-        db_index=True
+        verbose_name="Fecha de evaluación", default=timezone.now, db_index=True
     )
 
     job_applications = models.ManyToManyField(
@@ -398,9 +396,7 @@ class AccuracyMetrics(models.Model):
         blank=True,
     )
 
-    total_cvs = models.PositiveIntegerField(
-        verbose_name="N° CVs evaluados", default=0
-    )
+    total_cvs = models.PositiveIntegerField(verbose_name="N° CVs evaluados", default=0)
     total_cvs_selected = models.PositiveIntegerField(
         verbose_name="N° CVs seleccionados (IA o reclutador)", default=0
     )
@@ -433,27 +429,31 @@ class AccuracyMetrics(models.Model):
 
         self.total_cvs = apps.count()
 
-        self.total_cvs_selected = apps.filter(
-            analysis__status="Aprobado"
-        ).distinct().count()
+        self.total_cvs_selected = (
+            apps.filter(analysis__status="Aprobado").distinct().count()
+        )
 
-        self.total_cvs_passed_ef = apps.filter(
-            status_interview__in=["Pasa entrevista", "Contratado"]
-        ).distinct().count()
-        
+        self.total_cvs_passed_ef = (
+            apps.filter(status_interview__in=["Pasa entrevista", "Contratado"])
+            .distinct()
+            .count()
+        )
+
         avg_score = (
             apps.filter(analysis__overall_score__isnull=False)
             .aggregate(avg=Avg("analysis__overall_score"))
             .get("avg")
         )
         self.average_score = avg_score or 0
-
-        if self.total_cvs_selected > 0:
+        
+        if self.total_cvs_selected == 0 and self.total_cvs_passed_ef == 0:
+            self.selection_accuracy = 100.0
+            print(self.selection_accuracy)
+        elif self.total_cvs_selected > 0:
             self.selection_accuracy = round(
                 (self.total_cvs_passed_ef / self.total_cvs_selected) * 100, 3
             )
         else:
             self.selection_accuracy = 0
-
         self.save()
         return self.selection_accuracy
