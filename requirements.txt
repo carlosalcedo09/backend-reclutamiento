@@ -11,8 +11,10 @@ django-import-export==4.3.8
 django-unfold==0.22.0
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
+gunicorn==23.0.0
 idna==3.10
 MarkupSafe==3.0.3
+packaging==25.0
 pillow==11.3.0
 psycopg2-binary==2.9.9
 pycparser==2.23
