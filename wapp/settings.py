@@ -97,9 +97,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "wapp.wsgi.application"
 
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "").split(",")
-
-# Si necesitas permitir cookies/sesiones entre dominios
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 CORS_ALLOW_CREDENTIALS = True
 
 # Database
