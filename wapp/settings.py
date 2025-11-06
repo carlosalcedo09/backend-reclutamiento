@@ -99,6 +99,8 @@ WSGI_APPLICATION = "wapp.wsgi.application"
 
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
