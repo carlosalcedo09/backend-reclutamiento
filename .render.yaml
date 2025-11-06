@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: backend-reclutamiento
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wapp.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
