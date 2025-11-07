@@ -448,7 +448,6 @@ class AccuracyMetrics(models.Model):
         
         if self.total_cvs_selected == 0 and self.total_cvs_passed_ef == 0:
             self.selection_accuracy = 100.0
-            print(self.selection_accuracy)
         elif self.total_cvs_selected > 0:
             self.selection_accuracy = round(
                 (self.total_cvs_passed_ef / self.total_cvs_selected) * 100, 3

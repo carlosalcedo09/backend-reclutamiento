@@ -4,7 +4,6 @@ import requests
 import os
 from apps.job.choices import ResultChoices
 from django.conf import settings
-API_URL = f"{settings.BACKIA}/api/evaluate"
 
 def base64_pdf(file_field) -> str | None:
     """

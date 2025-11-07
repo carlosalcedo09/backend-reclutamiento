@@ -35,6 +35,7 @@ from apps.job.utils.utils import (
 )
 from collections import Counter
 
+API_URL = f"{settings.BACKIA}/api/evaluate"
 
 class JobBenefitsInline(TabularInline):
     model = JobBenefits
@@ -331,7 +332,7 @@ class JobApplicationsAdmin(BaseAdmin):
         # === ENVÍO A FASTAPI ===
         try:
             response = requests.post(
-                "http://127.0.0.1:8001/api/evaluate",
+                f"{API_URL}",
                 json=payload,
                 timeout=180,
             )
@@ -412,10 +413,6 @@ class JobApplicationsAdmin(BaseAdmin):
                 metric.job_applications.set(apps_by_date)
                 metric.calculate_metrics()
 
-                print(
-                    f"📊 Exactitud para {d}: {metric.selection_accuracy}% "
-                    f"({apps_by_date.count()} CVs)"
-                )
             applications = (
                 JobApplications.objects.filter(joboffers=offer)
                 .select_related("candidate")
