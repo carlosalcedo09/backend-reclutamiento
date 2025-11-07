@@ -101,6 +101,7 @@ CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
+BACKIA = os.getenv("BACKIA", "http://3.143.113.222") 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

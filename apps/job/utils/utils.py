@@ -3,8 +3,8 @@ from datetime import date, datetime
 import requests
 import os
 from apps.job.choices import ResultChoices
-
-API_URL = "http://localhost:8000/api/evaluate"
+from django.conf import settings
+API_URL = f"{settings.BACKIA}/api/evaluate"
 
 def base64_pdf(file_field) -> str | None:
     """
